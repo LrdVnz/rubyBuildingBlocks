@@ -1,228 +1,176 @@
 require 'pry'
 
-$a = [" ", " ", " "]
-
-$b = [" ", " ", " "]
-
-$c = [" ", " ", " "]
+$win_combos = {
+ 1 => [[0, 0], [0, 1], [0, 2]] ,
+ 2 => [[1, 0], [1, 1], [1, 2]] ,
+ 3 => [[2, 0], [2, 1], [2, 2]],
+ 4 => [[0, 0], [1, 0], [2, 0]],
+ 5 => [[0, 1], [1, 1], [2, 1]],
+ 6 => [[0, 2], [1, 2], [2, 2]],
+ 7 => [[0, 0], [1, 1], [2, 2]],
+ 8 => [[0, 2], [1, 1], [2, 0]]
+}
 
 $winner = false
-
-def showBoard
-    print $a 
-    puts "\n"
-    print $b
-    puts "\n"
-    print $c
-    puts "\n"
-end
+$n = 0
 
 
-class Player
-  attr_reader :sign
+ class Board 
+    attr_accessor :grid
 
-  def initialize(sign)
-   @sign = sign 
-  end
-  $i = 0
-  def put_sign(row, column, sign = @sign)
-    case row
-    when "a" 
-       if $a[column] == " "
-        $a[column] = sign
-        $i = $i + 1
-        puts "i is #{$i}"
-        showBoard
-          if $i == 3 
-            win
-          end
-        else
-        puts "choose another space!"
-        call_put
-       end
-    when "b"
-       if $b[column] == " "
-        $b[column] = sign
-        $i = $i + 1
-        puts "i is #{$i}"
-        showBoard
-        if $i == 3 
-          win
-        end
-      else
-        puts "choose another space!"
-        call_put
-       end
-    when "c"
-       if $c[column] == " " 
-        $c[column] = sign
-        $i = $i + 1
-        puts "i is #{$i}"
-        showBoard
-        if $i == 3 
-          win
-        end
-      else
-        puts "choose another space!"
-        call_put
-       end
-    end
-  end
-
-
-  def win(sign = @sign)
-
-    rowA, columnA = [], [] 
-    $a.each_with_index { |item, i | 
-       if item == sign
-     rowA.push(item)
-     columnA.push(item)
-       end
-    }
-
-    rowB, columnB = [], []
-    $b.each_with_index { |item, i | 
-       if item == sign
-     rowB.push(item)
-     columnB.push(item)
-       end
-    }
-
-    rowC, columnC = [], []
-    $c.each_with_index { |item, i | 
-       if item == sign
-     rowC.push(item)
-     columnC.push(item)
-       end
-    }
-      if rowA == rowB && rowB == rowC && rowC == rowA
-          $winner = true
-          puts "YOU WIN"
-      elsif columnA == columnB && columnB == columnC && columnC == columnA 
-          $winner = true
-          puts "YOU WIN"
-      elsif rowA == columnA && rowB == columnB && rowC == columnB 
-          $winner = true
-          puts "YOU WIN!"
+    def initialize 
+        @grid = [
+            [" ", " ", " "],
+            [" ", " ", " "],
+            [" ", " ", " "]    
+           ]
       end
-   end
-end
+    
+    def show
+        print grid[0]
+        print "\n"
+        print grid[1]
+        print "\n"
+        print grid[2]
+        print "\n"
+    end
+ end
 
+
+
+ class Player
+    attr_accessor :sign
+    def initialize(sign, name)
+        @sign = sign
+        @name = name
+    end
+    
+    def put_sign(row, column, sign = @sign)
+        if $board.grid[row][column] == " "
+            $board.grid[row][column] = sign
+            $board.show
+        else 
+          puts "cell already occupied"
+          call_put_oneplayer
+        end
+    win if $n > 1
+    end
+
+
+    def win
+        result = []
+        j = 0
+    while j < $board.grid.length
+      $board.grid[j].each_with_index { |a, i| 
+      if a == @sign
+        result.push([j, i])
+      end
+      }
+      j += 1
+    end
+
+     $i = 1
+    until $winner == true
+    if $win_combos[$i] === result
+        puts "#{@name} WINS"
+        $winner = true
+    end
+    $i += 1
+   end
+ end
+end
 
 
 class CPU < Player
-  attr_reader :compsign
-
-  def initialize(compsign)
-    @compsign = compsign
+  def initialize
+    if $p1.sign == "X"
+      @cpusign = "O"
+    elsif $p1.sign == "O"
+      @cpusign = "X"
+    end
+   @name = "cpu"
   end
 
-  def put_sign(row = ("a".."c").to_a.sample, column = rand(2), sign = @compsign)
-    i = 0
-    case row
-    when "a" 
-       if $a[column] == " "
-        $a[column] = sign
-        i = i + 1
-          if i == 3 
-            win(@compsign)
-          end
-       else 
-        self.put_sign
-       end
-    when "b"
-       if $b[column] == " "
-        $b[column] = sign
-        i = i + 1
-        if i == 3 
-          win(@compsign)
+    def put_sign(row = rand(2), column = rand(2) , sign = @cpusign)
+        if $board.grid[row][column] == " "
+          $board.grid[row][column] = sign
+          $board.show
+        else 
+          self.put_sign
         end
-       else
-        self.put_sign
-       end
-    when "c"
-       if $c[column] == " " 
-        $c[column] = sign
-        i = i + 1
-        if i == 3 
-          win(@compsign)
-        end
-       else
-        self.put_sign
-       end
+    win if $n > 1
+     end
+end
+
+
+def start
+$board = Board.new
+puts "Write '1P' for one player mode vs the cpu, or '2P' for two player mode"
+$mode = gets.chomp
+if $mode == '1P'
+  puts "Choose a sign. X or O"
+  choice = gets.chomp
+    if choice == "X" 
+    $p1 = Player.new("X", "p1")
+    $cpu = CPU.new
+    elsif choice == "O"
+    $p1 = Player.new("O", "p1")
+    $cpu = CPU.new("X")
+    end
+    puts "You are 'p1' "
+elsif $mode == '2P'
+   puts "First player choose X or O"
+   first_choice = gets.chomp
+    if first_choice == "X"
+      $p1 = Player.new("X", "p1")
+      $p2 = Player.new("O", "p2")
+      puts " p1 is X, p2 is O"
+    elsif first_choice == "O"
+      $p1 = Player.new("O", "p1")
+      $p2 = Player.new("X", "p2")
+      puts " p1 is O, p2 is X"
+    end
+end
+end
+
+def call_put_oneplayer
+  puts "Choose a row"
+  row1 = gets.chomp.to_i
+  puts "Choose a column"
+  col1 = gets.chomp.to_i
+  $p1.put_sign(row1, col1)
+end
+
+def call_put_twoplayers
+  puts "p1 choose a row"
+  row1 = gets.chomp.to_i
+  puts "Choose a column"
+  col1 = gets.chomp.to_i
+  $p1.put_sign(row1, col1)
+
+  puts "p2 choose a row"
+  row2 = gets.chomp.to_i
+  puts "Choose a column"
+  col2 = gets.chomp.to_i
+  $p2.put_sign(row2, col2)
+
+end
+
+start 
+
+def play_rounds
+  if $mode == "1P"
+    until $winner == true
+      call_put_oneplayer
+      $cpu.put_sign
+      $n += 1
+    end
+  elsif $mode == "2P"
+    until $winner == true
+      call_put_twoplayers
+      $n += 1
     end
   end
-
-  def win(sign = @compsign)
-    rowA, columnA = [], [] 
-
-    $a.each_with_index { |item, i | 
-       if item == sign
-     rowA.push("a")
-     columnA.push(i)
-       end
-    }
-    rowB, columnB = [], []
-
-    $b.each_with_index { |item, i | 
-       if item == sign
-     rowB.push("b")
-     columnB.push(i)
-       end
-    }
-    rowC, columnC = [], []
-
-    $c.each_with_index { |item, i | 
-       if item == sign
-     rowC.push("c")
-     columnC.push(i)
-       end
-    }
-      if rowA == rowB && rowB == rowC && rowC == rowA
-          $winner = true
-          puts "YOU LOST"
-      elsif rowA != rowB && rowB != rowC && rowC != rowA 
-        if columnA == columnB && columnB == columnC && columnC == columnA 
-          $winner = true
-          puts "YOU LOST"
-        elsif columnA != columnB && columnB != columnC && columnC != columnA
-          $winner = true
-          puts "YOU LOST"
-        end
-      end
-   end
 end
 
-
-def start_game 
- puts "Choose a sign ! X or O"
- sign = gets.chomp 
-   if sign == "X" || sign == "x"
-    $p1 = Player.new("X")
-    $cpu = CPU.new("O")
-    puts "You are '$p1' ."
-   elsif sign == "O" || sign == "o"
-    $p1 = Player.new("O")
-    $cpu = CPU.new("X")
-    puts "You are '$p1' ."
-   else 
-    puts "Choose X or O"
-    start_game
-   end
-end
-
-start_game
-puts "Use call_put to put a sign.Choose a to b for rows and 0 to 2 for columns."
-
-def call_put 
-  puts "Choose a row"
-  rows = gets.chomp
-  puts "Choose a column"
-  columns = gets.chomp.to_i
-  $p1.put_sign(rows, columns)
-  $cpu.put_sign()
-end
-
-while $winner == false
-  call_put
-end
+play_rounds
