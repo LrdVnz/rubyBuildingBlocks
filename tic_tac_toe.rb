@@ -1,176 +1,102 @@
-require 'pry'
+# frozen_string_literal: true
 
-$win_combos = {
- 1 => [[0, 0], [0, 1], [0, 2]] ,
- 2 => [[1, 0], [1, 1], [1, 2]] ,
- 3 => [[2, 0], [2, 1], [2, 2]],
- 4 => [[0, 0], [1, 0], [2, 0]],
- 5 => [[0, 1], [1, 1], [2, 1]],
- 6 => [[0, 2], [1, 2], [2, 2]],
- 7 => [[0, 0], [1, 1], [2, 2]],
- 8 => [[0, 2], [1, 1], [2, 0]]
-}
+WIN_COMBOS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+].freeze
 
-$winner = false
-$n = 0
-
-
- class Board 
-    attr_accessor :grid
-
-    def initialize 
-        @grid = [
-            [" ", " ", " "],
-            [" ", " ", " "],
-            [" ", " ", " "]    
-           ]
-      end
-    
-    def show
-        print grid[0]
-        print "\n"
-        print grid[1]
-        print "\n"
-        print grid[2]
-        print "\n"
-    end
- end
-
-
-
- class Player
-    attr_accessor :sign
-    def initialize(sign, name)
-        @sign = sign
-        @name = name
-    end
-    
-    def put_sign(row, column, sign = @sign)
-        if $board.grid[row][column] == " "
-            $board.grid[row][column] = sign
-            $board.show
-        else 
-          puts "cell already occupied"
-          call_put_oneplayer
-        end
-    win if $n > 1
+# Container module for the game actions (start and play)
+module PlayGame
+  def startgame
+    puts 'p1 choose a sign'
+    p1sign = gets.chomp
+    if p1sign == 'X'
+      @p1 = Player.new('X')
+      @p2 = Player.new('O')
+    elsif p1sign == 'O'
+      @p1 = Player.new('O')
+      @p2 = Player.new('X')
     end
 
-
-    def win
-        result = []
-        j = 0
-    while j < $board.grid.length
-      $board.grid[j].each_with_index { |a, i| 
-      if a == @sign
-        result.push([j, i])
-      end
-      }
-      j += 1
+    while winner == false
+      call_put(@p1, 'p1')
+      call_put(@p2, 'p2')
     end
+  end
 
-     $i = 1
-    until $winner == true
-    if $win_combos[$i] === result
-        puts "#{@name} WINS"
-        $winner = true
-    end
-    $i += 1
-   end
- end
+  def call_put(player, string)
+    puts "#{string} Choose a position"
+    pos = gets.chomp.to_i
+    put_sign(pos, player.sign, string.to_s)
+  end
 end
 
-
-class CPU < Player
+# Main game class
+class Game
+  include PlayGame
+  attr_accessor :board, :n, :winner, :p1, :p2
   def initialize
-    if $p1.sign == "X"
-      @cpusign = "O"
-    elsif $p1.sign == "O"
-      @cpusign = "X"
-    end
-   @name = "cpu"
+    @winner = false
+    @board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
   end
 
-    def put_sign(row = rand(2), column = rand(2) , sign = @cpusign)
-        if $board.grid[row][column] == " "
-          $board.grid[row][column] = sign
-          $board.show
-        else 
-          self.put_sign
-        end
-    win if $n > 1
-     end
-end
+  def showboard
+    puts " #{@board[0]} | #{@board[1]} | #{@board[2]} "
+    puts ' ----------- '
+    puts " #{@board[3]} | #{@board[4]} | #{@board[5]} "
+    puts ' ----------- '
+    puts " #{@board[6]} | #{@board[7]} | #{@board[8]} "
+  end
 
-
-def start
-$board = Board.new
-puts "Write '1P' for one player mode vs the cpu, or '2P' for two player mode"
-$mode = gets.chomp
-if $mode == '1P'
-  puts "Choose a sign. X or O"
-  choice = gets.chomp
-    if choice == "X" 
-    $p1 = Player.new("X", "p1")
-    $cpu = CPU.new
-    elsif choice == "O"
-    $p1 = Player.new("O", "p1")
-    $cpu = CPU.new("X")
+  def put_sign(position, sign, current_player)
+    if @board[position] == ' '
+      @board[position] = sign
+      showboard
+      win(sign, current_player)
+      full_board?
+    else
+      puts 'Choose another cell'
+      showboard
+      call_put(current_player, current_player.to_s)
     end
-    puts "You are 'p1' "
-elsif $mode == '2P'
-   puts "First player choose X or O"
-   first_choice = gets.chomp
-    if first_choice == "X"
-      $p1 = Player.new("X", "p1")
-      $p2 = Player.new("O", "p2")
-      puts " p1 is X, p2 is O"
-    elsif first_choice == "O"
-      $p1 = Player.new("O", "p1")
-      $p2 = Player.new("X", "p2")
-      puts " p1 is O, p2 is X"
+  end
+
+  def win(sign, player)
+    has_won = WIN_COMBOS.detect do |combo|
+      @board[combo[0]] == @board[combo[1]] &&
+        @board[combo[1]] == @board[combo[2]] &&
+        @board[combo[0]] == sign
     end
-end
-end
 
-def call_put_oneplayer
-  puts "Choose a row"
-  row1 = gets.chomp.to_i
-  puts "Choose a column"
-  col1 = gets.chomp.to_i
-  $p1.put_sign(row1, col1)
-end
+    return unless has_won
 
-def call_put_twoplayers
-  puts "p1 choose a row"
-  row1 = gets.chomp.to_i
-  puts "Choose a column"
-  col1 = gets.chomp.to_i
-  $p1.put_sign(row1, col1)
+    puts "#{player} WINS"
+    @winner = true
+  end
 
-  puts "p2 choose a row"
-  row2 = gets.chomp.to_i
-  puts "Choose a column"
-  col2 = gets.chomp.to_i
-  $p2.put_sign(row2, col2)
+  def full_board?
+    is_full = @board.all? { |cell| cell != ' ' }
+    return unless is_full && @winner == false
 
-end
-
-start 
-
-def play_rounds
-  if $mode == "1P"
-    until $winner == true
-      call_put_oneplayer
-      $cpu.put_sign
-      $n += 1
-    end
-  elsif $mode == "2P"
-    until $winner == true
-      call_put_twoplayers
-      $n += 1
-    end
+    puts "It's a tie"
+    @winner = true
   end
 end
 
-play_rounds
+# Player class
+class Player
+  attr_reader :sign
+
+  def initialize(sign)
+    @sign = sign
+  end
+end
+
+game = Game.new
+game.startgame
