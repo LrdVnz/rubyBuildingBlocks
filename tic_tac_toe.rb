@@ -15,7 +15,7 @@ WIN_COMBOS = [
 module PlayGame
   def startgame
     puts 'p1 choose a sign'
-    p1sign = gets.chomp
+    p1sign = gets.chomp.upcase
     if p1sign == 'X'
       @p1 = Player.new('X')
       @p2 = Player.new('O')
@@ -25,15 +25,15 @@ module PlayGame
     end
 
     while winner == false
-      call_put(@p1, 'p1')
-      call_put(@p2, 'p2')
+      call_put(@p1)
+      call_put(@p2)
     end
   end
 
-  def call_put(player, string)
-    puts "#{string} Choose a position"
+  def call_put(player)
+    puts "#{player.sign} Choose a position"
     pos = gets.chomp.to_i
-    put_sign(pos, player.sign, string.to_s)
+    put_sign(pos, player)
   end
 end
 
@@ -54,20 +54,20 @@ class Game
     puts " #{@board[6]} | #{@board[7]} | #{@board[8]} "
   end
 
-  def put_sign(position, sign, current_player)
+  def put_sign(position, player)
     if @board[position] == ' '
-      @board[position] = sign
+      @board[position] = player.sign
       showboard
-      win(sign, current_player)
+      win(player.sign)
       full_board?
     else
       puts 'Choose another cell'
       showboard
-      call_put(current_player, current_player.to_s)
+      call_put(player)
     end
   end
 
-  def win(sign, player)
+  def win(sign)
     has_won = WIN_COMBOS.detect do |combo|
       @board[combo[0]] == @board[combo[1]] &&
         @board[combo[1]] == @board[combo[2]] &&
@@ -76,7 +76,7 @@ class Game
 
     return unless has_won
 
-    puts "#{player} WINS"
+    puts "#{sign} WINS"
     @winner = true
   end
 
@@ -91,7 +91,7 @@ end
 
 # Player class
 class Player
-  attr_reader :sign
+  attr_accessor :sign
 
   def initialize(sign)
     @sign = sign
