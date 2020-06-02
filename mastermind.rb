@@ -18,7 +18,7 @@ module SharedFunctions
     @player_choice = []
     puts '-----------------------'
     puts 'Choose your colors'
-    0.upto(3) { |i| @code << gets.chomp.downcase }
+    0.upto(3) { |_i| @code << gets.chomp.downcase }
     @player_choice
   end
 
@@ -33,12 +33,12 @@ module SharedFunctions
       black.times { result.unshift('black').pop }
       white.times { result.unshift('white').pop }
     end
-    final = result.reject{|x| x == ""}
+    final = result.reject { |x| x == '' }
     final
   end
 end
 
-#general game class
+# general game class
 class Game
   include SharedFunctions
 
@@ -49,25 +49,25 @@ class Game
     gamemode
   end
 
-  def gamemode 
+  def gamemode
     puts "Do you want to be the code 'Creator' or the 'Decoder' ? "
-    mode = gets.chomp.downcase 
-      if mode == "creator"
-        puts "Choose 4 colors from these : "
-        p COLORS 
-        0.upto(3) { |i| @code << gets.chomp.downcase }
-        @player = Player.new(@code)
-        @cpu = Cpu.new()
-        creator_game
-      elsif mode == "decoder"
-        0.upto(3) { |i| @code << COLORS.sample }
-        @cpu = Cpu.new(@code)
-        @player = Player.new()
-        decoder_game
-      end
+    mode = gets.chomp.downcase
+    if mode == 'creator'
+      puts 'Choose 4 colors from these : '
+      p COLORS
+      0.upto(3) { |_i| @code << gets.chomp.downcase }
+      @player = Player.new(@code)
+      @cpu = Cpu.new
+      creator_game
+    elsif mode == 'decoder'
+      0.upto(3) { |_i| @code << COLORS.sample }
+      @cpu = Cpu.new(@code)
+      @player = Player.new
+      decoder_game
+    end
   end
-  
-  def creator_game 
+
+  def creator_game
     loop do
       creator_rounds
       if @winner == true
@@ -90,9 +90,9 @@ class Game
     puts @guess
     p verified
     @winner = true if verified == won
-    go_on = gets
+    gets
   end
-   
+
   def decoder_game
     loop do
       decoder_rounds
@@ -116,31 +116,29 @@ class Game
     p arr
     @winner = true if verified == win_arr
   end
-
 end
 
-class Player 
- include SharedFunctions
+class Player
+  include SharedFunctions
   attr_reader :code
-  def initialize(code = "")
-        @code = code
+  def initialize(code = '')
+    @code = code
   end
 
   def guess
     @choice = []
     puts '-----------------------'
     puts 'Choose your colors'
-    0.upto(3) { |i| @choice << gets.chomp.downcase }
+    0.upto(3) { |_i| @choice << gets.chomp.downcase }
     @choice
   end
-
 end
 
-#controls for cpu
+# controls for cpu
 class Cpu
- include SharedFunctions
+  include SharedFunctions
   attr_reader :code
-  def initialize(code = "")
+  def initialize(code = '')
     @code = code
   end
 
@@ -148,10 +146,9 @@ class Cpu
     @choice = []
     puts '-----------------------'
     puts 'The cpu chose :'
-    0.upto(3) { |i| @choice << COLORS.sample }
+    0.upto(3) { |_i| @choice << COLORS.sample }
     @choice
   end
-
 end
 
 game = Game.new
