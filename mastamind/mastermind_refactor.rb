@@ -1,20 +1,22 @@
 # frozen_string_literal: true
 
-COLORS = %w[red yellow blue magenta cyan green].freeze
+require 'pry'
+
+COLORS = %w[red yellow blue green purple brown].freeze
 
 class Game
   def initialize
-    gamemode
+    @turns = 0
+    @winner = false
   end
 
   def gamemode
     puts "Do you want to be the code 'Creator' or the 'Decoder' ? "
     mode = gets.chomp.downcase
-    case mode
-    when 'decoder'
-      Decoder.new
-    when 'creator'
+    if mode == 'creator'
       Creator.new
+    elsif mode == 'decoder'
+      Decoder.new
     end
   end
 end
@@ -25,33 +27,42 @@ class Creator
     @winner = false
     @code = []
     @progress = Array.new(4, '')
-    @guess = Array.new(4, '')
-    start_game
+    show_options
+    get_choice
+    creator_game
   end
 
   def creator_game
-    loop do
-      creator_rounds
-      if @winner == true
-        puts 'CPU WINS'
-        break
-      elsif @turns == 12 && @winner == false
-        creator_loser
-        break
-       end
+  loop do
+    creator_rounds
+    if @winner == true
+      puts 'CPU WINS'
+      break
+     elsif @turns == 12 && @winner == false
+      creator_loser
+      break
+     end
     end
   end
 
+  def creator_loser
+    puts 'PLAYER WINS. The code is:'
+    p @code
+  end
+
   def creator_rounds
-    fill
+    @guess = fill
     @turns += 1
     puts '///////////'
     puts @guess
-    check_verified
+    verified = verify
+    won = Array.new(4, 'black')
+    p verified
+    @winner = true if verified == won
     gets
    end
 
-  def verify
+   def verify    
     @result = Array.new(4, '')
     @black = count_black
     if @black == 4
@@ -63,59 +74,17 @@ class Creator
       put_white
     end
     keep_equal
-    @result.reject { |x| x == '' }
- end
-
-  def fill
-    @guess.map! { |i| i = i == '' ? COLORS.sample : i }
+    final = @result.reject { |x| x == '' }
+    final
   end
 
-  def keep_equal
-    @progress = Array.new(4, '')
-    blacks = Array.new(4, '')
-    whites = Array.new(4, '')
-    fill
-    @code.zip(@guess).each_with_index do |x, index|
-      if x.inject(:eql?) == true
-        blacks[index] = @guess[index]
-      elsif @code.include?(@guess[index])
-        range = [*0...@code.length] - [index]
-        random = range.sample
-        random = range.sample while blacks[random] != ''
-        whites[random] = @guess[index]
-      end
-    end
-
-    blacks.each_with_index do |x, _index|
-      i = 0
-      while i < whites.length
-        whites[i] = '' if x == whites[i] && x != ''
-        i += 1
-      end
-    end
-
-    whites.each_with_index { |x, index| @progress[index] = x if x != '' }
-
-    blacks.each_with_index { |x, index| @progress[index] = x if x != '' }
-
-    @guess = @progress
-  end
-
-  def start_game
-    show_options
-    get_choice
-    creator_game
+   def fill
+    @progress.map! { |i| i = i == '' ? COLORS.sample : i }
    end
-
-  def check_verified
-    won = Array.new(4, 'black')
-    p verify
-    @winner = true if verify == won
-  end
 
   def show_options
     puts 'Choose 4 colors from these : '
-    puts COLORS
+    p COLORS
   end
 
   def get_choice
@@ -138,13 +107,32 @@ class Creator
     @white.times { @result.unshift('white').pop }
   end
 
-  def creator_loser
-    puts 'PLAYER WINS. The code is:'
-    p @code
-  end
+  def keep_equal
+    @equal_pos = false
+    @code.zip(@guess).each_with_index {|x, index|
+      if x.inject(:eql?) == true
+        @equal_pos = true
+      @progress[index] = @guess[index]
+      else
+        @progress[index] = ''
+      end
+      if @code.include?(@guess[index]) && @equal_pos == false
+        range = ([*0..(@code.length - 1)] - [index])
+        random = range.sample
+        random = range.sample while @progress[random] != ''
+        @progress[random] = @guess[index]
+    end
+    }
+   end
+
+    }
 end
 
+end
+
+
 class Decoder
+
   def initialize
     @turns = 0
     @winner = false
@@ -153,31 +141,32 @@ class Decoder
     decoder_game
   end
 
+
   def decoder_game
     take_random
     loop do
       decoder_rounds
       if @winner == true
-        puts 'YOU WIN'
+        puts "YOU WIN"
         break
       elsif @turns == 12 && @winner == false
-        puts 'YOU LOSE. The code is :'
+        puts "YOU LOSE. The code is :"
         p @code
       end
     end
    end
-
-  def take_random
-    0.upto(3) { |_i| @code << COLORS.sample }
+ 
+  def take_random 
+     0.upto(3) { |i| @code << COLORS.sample }
   end
-
+  
   def take_guess
-    @guess = []
-    0.upto(3) { |_i| @guess << gets.chomp.downcase }
+  @guess = []
+  0.upto(3) { |_i| @guess << gets.chomp.downcase }
   end
 
   def decoder_rounds
-    puts 'Choose 4 colors'
+    puts "Choose 4 colors"
     take_guess
     @turns += 1
     verified = decoder_verify
@@ -202,3 +191,5 @@ class Decoder
     final
   end
  end
+
+binding.pry

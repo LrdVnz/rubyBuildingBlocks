@@ -11,8 +11,15 @@ WIN_COMBOS = [
   [2, 4, 6]
 ].freeze
 
-# Container module for the game actions (start and play)
-module PlayGame
+# Main game class
+class Game
+  attr_accessor :board, :n, :winner, :p1, :p2
+  def initialize
+    @winner = false
+    @board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+    startgame
+  end
+
   def startgame
     puts 'p1 choose a sign'
     p1sign = gets.chomp.upcase
@@ -34,16 +41,6 @@ module PlayGame
     puts "#{player.sign} Choose a position"
     pos = gets.chomp.to_i
     put_sign(pos, player)
-  end
-end
-
-# Main game class
-class Game
-  include PlayGame
-  attr_accessor :board, :n, :winner, :p1, :p2
-  def initialize
-    @winner = false
-    @board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
   end
 
   def showboard
@@ -99,4 +96,3 @@ class Player
 end
 
 game = Game.new
-game.startgame
