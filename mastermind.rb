@@ -177,7 +177,8 @@ class Decoder
   end
 
   def decoder_rounds
-    puts 'Choose 4 colors'
+    puts 'Choose 4 colors from:'
+    puts COLORS
     take_guess
     @turns += 1
     verified = decoder_verify
