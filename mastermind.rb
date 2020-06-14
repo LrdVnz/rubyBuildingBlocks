@@ -154,6 +154,9 @@ class Decoder
   end
 
   def decoder_game
+    puts 'Choose 4 colors from these every turn:'
+    puts COLORS
+    puts "----------------"
     take_random
     loop do
       decoder_rounds
@@ -177,8 +180,6 @@ class Decoder
   end
 
   def decoder_rounds
-    puts 'Choose 4 colors from:'
-    puts COLORS
     take_guess
     @turns += 1
     verified = decoder_verify
