@@ -202,3 +202,5 @@ class Decoder
     final
   end
  end
+
+ Game.new
