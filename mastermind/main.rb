@@ -1,9 +1,11 @@
 # frozen_string_literal: true
+
 load 'creator.rb'
 load 'decoder.rb'
 
 COLORS = %w[red yellow blue magenta cyan green].freeze
 
+# Main game class
 class Game
   def initialize
     gamemode
