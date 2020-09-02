@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Class for the "Decoder" mode
 class Decoder
   def initialize
