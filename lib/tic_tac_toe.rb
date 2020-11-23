@@ -17,7 +17,7 @@ class Game
   def initialize
     @winner = false
     @board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
-    startgame
+    #startgame
   end
 
   def startgame
@@ -29,7 +29,10 @@ class Game
     elsif p1sign == 'O'
       @p1 = Player.new('O')
       @p2 = Player.new('X')
-    end
+    else
+      puts "Please choose between X or O"
+      startgame
+    end 
 
     while winner == false
       call_put(@p1)
@@ -38,6 +41,7 @@ class Game
   end
 
   def call_put(player)
+    return if @winner == true
     puts "#{player.sign} Choose a position"
     pos = gets.chomp.to_i
     put_sign(pos, player)
@@ -71,18 +75,18 @@ class Game
         @board[combo[0]] == sign
     end
 
-    return unless has_won
+    return @board unless has_won
 
-    puts "#{sign} WINS"
     @winner = true
+    return "#{sign} WINS"
   end
 
   def full_board?
     is_full = @board.all? { |cell| cell != ' ' }
     return unless is_full && @winner == false
 
-    puts "It's a tie"
     @winner = true
+    return "It's a tie"
   end
 end
 
