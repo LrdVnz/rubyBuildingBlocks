@@ -17,10 +17,10 @@ class Game
   def initialize
     @winner = false
     @board = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
-    #startgame
+    startgame
   end
 
-  def startgame
+  def startgame(p1sign = 'X')
     puts 'p1 choose a sign'
     p1sign = gets.chomp.upcase
     if p1sign == 'X'
@@ -30,13 +30,12 @@ class Game
       @p1 = Player.new('O')
       @p2 = Player.new('X')
     else
-      puts "Please choose between X or O"
-      startgame
+      return "Please choose between X or O"
     end 
 
-    while winner == false
-      call_put(@p1)
-      call_put(@p2)
+   while winner == false
+    call_put(@p1)
+    call_put(@p2)
     end
   end
 
@@ -44,6 +43,7 @@ class Game
     return if @winner == true
     puts "#{player.sign} Choose a position"
     pos = gets.chomp.to_i
+    call_put if !pos.is_a? Integer
     put_sign(pos, player)
   end
 
