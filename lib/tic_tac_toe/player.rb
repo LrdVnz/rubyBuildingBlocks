@@ -14,7 +14,7 @@ class Player
       choice = gets.chomp.upcase
       return choice if choice.match(/[X,Y]/)
 
-      puts 'Wrong Input! Choose X or Y.'
+      puts 'Wrong Input! Choose X or O.'
     end
   end
 

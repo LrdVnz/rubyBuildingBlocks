@@ -80,4 +80,4 @@ class Game < Player
 end
 
 g = Game.new
-g.startgame
+#g.startgame
