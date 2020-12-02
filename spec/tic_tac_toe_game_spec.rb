@@ -69,7 +69,58 @@
        #the call to choose_position and put_sign shouldn't need to be tested
      end
 
+     describe "#put_sign" do
+      subject(:game_put_sign) { described_class.new }
+      let(:p1) { Player.new('O') }
 
+
+      context "when position chosen is taken" do
+        
+        before do 
+          game_put_sign.instance_variable_set(:@board, [' ', 'X'])
+          allow(game_put_sign).to receive(:puts).with('Choose another cell')
+          allow(game_put_sign).to receive(:showboard)
+        end
+
+       it "calls call_put" do
+        expect(game_put_sign).to receive(:call_put).with(p1)
+        game_put_sign.put_sign(1,p1)  
+        end
+      end
+
+      context "when position chosen is free" do
+        before do 
+          game_put_sign.instance_variable_set(:@board, [' ', 'X'])
+        end
+
+         it "modifies @board" do
+          allow(game_put_sign).to receive(:showboard)
+           allow(game_put_sign).to receive(:game_over?)
+           game_put_sign.put_sign(0, p1)
+           expect(game_put_sign.board).to eq(['O','X'])
+         end
+
+         it "calls showboard" do
+          allow(game_put_sign).to receive(:game_over?)
+           expect(game_put_sign).to receive(:showboard)
+           game_put_sign.put_sign(0,p1)
+         end
+
+         it "calls game_over" do
+           allow(game_put_sign).to receive(:showboard)
+           expect(game_put_sign).to receive(:game_over?).with(p1)
+           game_put_sign.put_sign(0,p1)
+         end
+      end
+     end
+
+     describe "#game_over?" do
+        #script method. Test methods called 
+     end
+
+     describe "#won?" do
+       
+     end
     end
  
  
